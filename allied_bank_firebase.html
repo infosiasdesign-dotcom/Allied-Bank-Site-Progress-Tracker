@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Allied Bank · Fazaia Branch · Live Site Tracker</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Serif+Display&display=swap');
+:root {
+  --navy:#0D1B2A; --navy2:#152536; --navy3:#1B3A5C;
+  --gold:#C9A84C; --gold-l:#EDD37A; --gold-bg:#FDF8EC;
+  --steel:#8A9BB0; --off:#F2F5F9; --white:#FFFFFF;
+  --red:#C0392B; --red-l:#FDECEA;
+  --green:#1E7E34; --green-l:#E8F5E9;
+  --amber:#C68B00; --amber-l:#FFF8E1;
+  --blue:#1A5276; --blue-l:#E3EBF6;
+  --grey:#6B7B8D; --border:#D5DCE6;
+  --shadow:0 2px 16px rgba(13,27,42,0.10);
+  --shadow-sm:0 1px 4px rgba(13,27,42,0.08);
+  --r:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:#E8EDF4;color:var(--navy);min-height:100vh;}
+
+/* SETUP SCREEN */
+.setup-screen{
+  position:fixed;inset:0;background:var(--navy);
+  display:flex;align-items:center;justify-content:center;
+  z-index:1000;padding:24px;
+}
+.setup-screen.hidden{display:none;}
+.setup-box{
+  background:var(--navy2);border:1px solid rgba(201,168,76,.3);
+  border-radius:16px;padding:36px;max-width:480px;width:100%;
+  box-shadow:0 24px 64px rgba(0,0,0,.5);
+}
+.setup-logo{
+  width:52px;height:52px;border-radius:12px;background:var(--gold);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Serif Display',serif;font-size:24px;color:var(--navy);
+  font-weight:900;margin:0 auto 20px;
+}
+.setup-box h2{font-family:'DM Serif Display',serif;font-size:22px;color:#fff;text-align:center;margin-bottom:6px;}
+.setup-box p{font-size:12px;color:var(--steel);text-align:center;margin-bottom:28px;line-height:1.6;}
+.setup-label{display:block;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:6px;}
+.setup-input{
+  width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(201,168,76,.25);
+  border-radius:8px;padding:11px 14px;font-size:13px;color:#fff;
+  font-family:'Inter',sans-serif;outline:none;margin-bottom:16px;
+  transition:border-color .15s;
+}
+.setup-input:focus{border-color:var(--gold);}
+.setup-input::placeholder{color:rgba(255,255,255,.25);}
+.setup-steps{
+  background:rgba(0,0,0,.2);border-radius:8px;padding:14px 16px;
+  margin-bottom:20px;font-size:11px;color:var(--steel);line-height:2;
+}
+.setup-steps a{color:var(--gold-l);text-decoration:none;}
+.setup-steps strong{color:#fff;}
+.btn-connect{
+  width:100%;background:var(--gold);color:var(--navy);border:none;
+  border-radius:8px;padding:13px;font-size:14px;font-weight:700;
+  cursor:pointer;font-family:'Inter',sans-serif;transition:opacity .15s;
+}
+.btn-connect:hover{opacity:.88;}
+.setup-error{color:var(--red);font-size:11px;text-align:center;margin-top:10px;display:none;}
+
+/* LOADING */
+.loading-overlay{
+  position:fixed;inset:0;background:var(--navy);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:900;transition:opacity .4s;
+}
+.loading-overlay.hidden{opacity:0;pointer-events:none;}
+.load-logo{
+  width:60px;height:60px;border-radius:14px;background:var(--gold);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Serif Display',serif;font-size:26px;color:var(--navy);
+  animation:breathe 1.8s ease-in-out infinite;margin-bottom:18px;
+}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.load-text{color:#fff;font-size:14px;font-weight:600;}
+.load-sub{color:var(--steel);font-size:11px;margin-top:5px;}
+
+/* TOPBAR */
+.topbar{
+  background:var(--navy);height:56px;padding:0 22px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:200;
+  border-bottom:2px solid var(--gold);
+  box-shadow:0 2px 16px rgba(0,0,0,.3);
+}
+.brand{display:flex;align-items:center;gap:11px;}
+.bmark{
+  width:32px;height:32px;border-radius:7px;background:var(--gold);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Serif Display',serif;font-size:14px;color:var(--navy);font-weight:900;flex-shrink:0;
+}
+.btxt strong{display:block;font-size:12px;font-weight:700;color:#fff;}
+.btxt span{font-size:9.5px;color:var(--gold-l);letter-spacing:.6px;text-transform:uppercase;}
+.tbar-right{display:flex;align-items:center;gap:10px;}
+.sync-pill{
+  display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:600;
+  padding:4px 11px;border-radius:20px;transition:all .3s;
+}
+.sp-live{background:rgba(30,126,52,.2);color:#5dbb74;border:1px solid rgba(30,126,52,.3);}
+.sp-saving{background:rgba(201,168,76,.15);color:var(--gold-l);border:1px solid rgba(201,168,76,.3);}
+.sp-err{background:rgba(192,57,43,.2);color:#e07b72;border:1px solid rgba(192,57,43,.3);}
+.sdot{width:7px;height:7px;border-radius:50%;background:currentColor;}
+.sp-saving .sdot{animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.btn-settings{
+  background:transparent;border:1px solid rgba(201,168,76,.3);color:var(--gold);
+  border-radius:6px;padding:5px 11px;font-size:11px;font-weight:600;
+  cursor:pointer;font-family:'Inter',sans-serif;
+}
+
+/* HERO */
+.hero{background:linear-gradient(160deg,var(--navy) 0%,var(--navy2) 60%,#1a2e42 100%);padding:20px 22px 0;border-bottom:1px solid rgba(201,168,76,.15);}
+.hero-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:16px;}
+.htitle h1{font-family:'DM Serif Display',serif;font-size:21px;color:#fff;line-height:1.2;}
+.htitle p{font-size:10.5px;color:var(--gold-l);margin-top:5px;letter-spacing:.4px;}
+.hstats{display:flex;gap:18px;flex-shrink:0;}
+.hs .v{font-family:'DM Serif Display',serif;font-size:28px;color:var(--gold);line-height:1;}
+.hs .l{font-size:9px;color:var(--steel);text-transform:uppercase;letter-spacing:.6px;margin-top:2px;}
+.meta-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));border-top:1px solid rgba(255,255,255,.07);}
+.mf{padding:9px 14px;border-right:1px solid rgba(255,255,255,.06);}
+.mf:last-child{border-right:none;}
+.mf label{display:block;font-size:9px;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:3px;}
+.mf input{background:transparent;border:none;outline:none;font-family:'Inter',sans-serif;font-size:12px;color:#fff;width:100%;}
+.mf input::placeholder{color:rgba(255,255,255,.22);}
+.tabs-wrap{display:flex;gap:3px;margin-top:16px;overflow-x:auto;scrollbar-width:none;padding-bottom:0;}
+.tabs-wrap::-webkit-scrollbar{display:none;}
+.ftab{flex-shrink:0;background:rgba(255,255,255,.07);border:none;border-radius:7px 7px 0 0;padding:8px 15px 11px;cursor:pointer;transition:all .15s;position:relative;}
+.ftab:hover{background:rgba(255,255,255,.13);}
+.ftab.active{background:#E8EDF4;}
+.ftab .tp{display:block;font-size:16px;font-weight:800;color:var(--steel);line-height:1;}
+.ftab.active .tp{color:var(--navy);}
+.ftab .tn{display:block;font-size:9px;letter-spacing:.4px;color:var(--steel);margin-top:2px;text-transform:uppercase;}
+.tbar-ind{position:absolute;bottom:0;left:5px;right:5px;height:3px;border-radius:3px 3px 0 0;background:var(--gold);opacity:0;}
+.ftab.active .tbar-ind{opacity:1;}
+
+/* MAIN */
+.main{max-width:1300px;margin:0 auto;padding:20px 22px 48px;}
+.floor-panel{display:none;}
+.floor-panel.active{display:block;}
+
+/* SUM STRIP */
+.sum-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:9px;margin-bottom:14px;}
+.sc{background:var(--white);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--shadow-sm);padding:11px 13px;text-align:center;}
+.sc .sv{font-family:'DM Serif Display',serif;font-size:24px;color:var(--navy);line-height:1;}
+.sc .sl{font-size:9px;color:var(--steel);text-transform:uppercase;letter-spacing:.6px;margin-top:3px;}
+.sc.gold-c{background:var(--gold-bg);border-color:rgba(201,168,76,.4);}
+.sc.gold-c .sv{color:var(--amber);}
+
+/* FLOOR CARD */
+.floor-card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--shadow);padding:16px 20px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.fcl h2{font-family:'DM Serif Display',serif;font-size:20px;color:var(--navy);}
+.fcl p{font-size:10.5px;color:var(--steel);margin-top:3px;text-transform:uppercase;letter-spacing:.5px;}
+.fpw{flex:1;max-width:380px;}
+.fp-lbl{display:flex;justify-content:space-between;margin-bottom:5px;}
+.fp-lbl span{font-size:10.5px;color:var(--grey);}
+.fp-lbl strong{font-size:11.5px;color:var(--navy);font-weight:700;}
+.fbar{height:7px;background:var(--border);border-radius:4px;overflow:hidden;}
+.fbar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-l));border-radius:4px;transition:width .5s ease;}
+.fbig{font-family:'DM Serif Display',serif;font-size:40px;color:var(--navy);line-height:1;text-align:right;}
+.fbig span{font-size:20px;}
+
+/* ROOMS */
+.rooms-list{display:flex;flex-direction:column;gap:9px;margin-bottom:18px;}
+.rcard{background:var(--white);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--shadow-sm);overflow:hidden;transition:box-shadow .15s;}
+.rcard:hover{box-shadow:var(--shadow);}
+.rcard-hdr{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background .12s;user-select:none;}
+.rcard-hdr:hover,.rcard.open>.rcard-hdr{background:var(--gold-bg);}
+.rcard.open>.rcard-hdr{border-bottom:1px solid rgba(201,168,76,.28);}
+.rhl{display:flex;align-items:center;gap:10px;}
+.rnum{width:28px;height:28px;border-radius:6px;background:var(--navy);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;}
+.ri h3{font-size:13px;font-weight:600;color:var(--navy);}
+.ri p{font-size:10px;color:var(--steel);margin-top:1px;}
+.rhr{display:flex;align-items:center;gap:11px;}
+.rpill{font-size:12px;font-weight:700;color:var(--navy);background:var(--off);border-radius:20px;padding:3px 11px;min-width:46px;text-align:center;}
+.chev{width:16px;height:16px;color:var(--steel);transition:transform .2s;flex-shrink:0;}
+.rcard.open .chev{transform:rotate(180deg);}
+.rbody{display:none;padding:14px 16px 16px;}
+.rcard.open .rbody{display:block;}
+
+/* CATS */
+.cats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;margin-bottom:14px;}
+.citem{background:var(--off);border-radius:7px;border:1px solid var(--border);padding:10px 11px;transition:border-color .15s;}
+.citem:focus-within{border-color:var(--gold);}
+.citem-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px;}
+.cc{font-size:9px;font-weight:700;letter-spacing:1px;color:var(--steel);text-transform:uppercase;}
+.cn{font-size:11px;font-weight:500;color:var(--navy);margin-top:2px;}
+.ssel{font-size:9px;font-weight:700;border:none;border-radius:5px;padding:3px 6px;cursor:pointer;outline:none;font-family:'Inter',sans-serif;letter-spacing:.4px;flex-shrink:0;}
+.sNS{background:#E5E9EF;color:#556677;}
+.sIP{background:var(--amber-l);color:var(--amber);}
+.sCM{background:var(--green-l);color:var(--green);}
+.sOB{background:var(--red-l);color:var(--red);}
+.sQC{background:var(--blue-l);color:var(--blue);}
+.pct-row{display:flex;align-items:center;gap:7px;margin-top:5px;}
+.pct-row input[type=range]{flex:1;accent-color:var(--gold);cursor:pointer;height:3px;}
+.pctv{font-size:11px;font-weight:700;color:var(--navy);min-width:30px;text-align:right;}
+.iinput{width:100%;margin-top:7px;border:1px solid var(--border);border-radius:5px;padding:5px 8px;font-size:11px;font-family:'Inter',sans-serif;color:var(--navy);resize:none;outline:none;background:var(--white);transition:border-color .15s;}
+.iinput:focus{border-color:var(--gold);}
+.iinput::placeholder{color:#c0c8d4;}
+
+/* PHOTO SECTION per room */
+.photo-section{margin-top:14px;border-top:1px solid var(--border);padding-top:14px;}
+.photo-section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.photo-section-hdr h4{font-size:11px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.6px;}
+.btn-add-photo{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--navy);color:var(--gold);border:none;
+  border-radius:6px;padding:6px 13px;font-size:11px;font-weight:700;
+  cursor:pointer;font-family:'Inter',sans-serif;transition:opacity .15s;
+}
+.btn-add-photo:hover{opacity:.85;}
+.photo-input-hidden{display:none;}
+.photos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;}
+.photo-thumb{
+  position:relative;border-radius:7px;overflow:hidden;
+  aspect-ratio:4/3;background:var(--off);border:1px solid var(--border);
+  cursor:pointer;
+}
+.photo-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.photo-thumb-overlay{
+  position:absolute;inset:0;background:rgba(13,27,42,0);
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+  padding:6px;transition:background .2s;
+}
+.photo-thumb:hover .photo-thumb-overlay{background:rgba(13,27,42,.55);}
+.photo-actions{display:flex;gap:6px;opacity:0;transition:opacity .2s;}
+.photo-thumb:hover .photo-actions{opacity:1;}
+.btn-del-photo{background:var(--red);color:#fff;border:none;border-radius:4px;padding:4px 8px;font-size:10px;font-weight:700;cursor:pointer;}
+.photo-caption-inp{
+  width:100%;margin-top:5px;font-size:10px;border:none;border-bottom:1px solid var(--border);
+  background:transparent;outline:none;font-family:'Inter',sans-serif;color:var(--navy);
+  padding:2px 0;
+}
+.photo-caption-inp::placeholder{color:#bbb;}
+.photo-empty{
+  grid-column:1/-1;padding:18px;text-align:center;
+  font-size:11px;color:var(--steel);
+  border:1.5px dashed var(--border);border-radius:7px;
+}
+
+/* LIGHTBOX */
+.lightbox{
+  position:fixed;inset:0;background:rgba(0,0,0,.88);
+  z-index:800;display:flex;align-items:center;justify-content:center;
+  padding:20px;
+}
+.lightbox.hidden{display:none;}
+.lightbox-inner{position:relative;max-width:90vw;max-height:88vh;}
+.lightbox-inner img{max-width:100%;max-height:85vh;border-radius:10px;display:block;}
+.lightbox-close{
+  position:absolute;top:-14px;right:-14px;
+  width:32px;height:32px;border-radius:50%;
+  background:var(--white);color:var(--navy);
+  border:none;font-size:18px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-weight:700;
+}
+.lightbox-caption{color:var(--white);font-size:12px;text-align:center;margin-top:10px;opacity:.8;}
+
+/* VISIT LOG */
+.vsection{background:var(--white);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden;margin-bottom:18px;}
+.vsec-hdr{background:var(--navy);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;}
+.vsec-hdr h3{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.8px;text-transform:uppercase;}
+.btn-addv{background:var(--gold);color:var(--navy);border:none;border-radius:5px;padding:5px 13px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;}
+.vtable{width:100%;border-collapse:collapse;}
+.vtable th{background:var(--off);font-size:9.5px;font-weight:700;color:var(--grey);text-transform:uppercase;letter-spacing:.5px;padding:8px 13px;text-align:left;border-bottom:1px solid var(--border);}
+.vtable td{padding:6px 13px;border-bottom:1px solid var(--border);font-size:11.5px;vertical-align:middle;}
+.vtable tr:last-child td{border-bottom:none;}
+.vtable td input,.vtable td textarea{width:100%;border:1px solid transparent;border-radius:4px;padding:3px 6px;font-size:11px;font-family:'Inter',sans-serif;background:transparent;outline:none;color:var(--navy);transition:all .15s;}
+.vtable td input:focus,.vtable td textarea:focus{border-color:var(--gold);background:var(--gold-bg);}
+.vtable td textarea{resize:vertical;min-height:30px;}
+.vnum{background:var(--navy);color:var(--gold);border-radius:4px;padding:2px 7px;font-size:9.5px;font-weight:700;display:inline-block;}
+.v-empty{padding:20px;text-align:center;font-size:11px;color:var(--steel);}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;padding:11px 16px;border-radius:var(--r);font-size:12px;font-weight:600;transform:translateY(70px);opacity:0;transition:all .3s;z-index:600;pointer-events:none;box-shadow:var(--shadow);}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.ok{background:var(--navy);color:var(--gold);border:1px solid var(--gold);}
+.toast.err{background:var(--red-l);color:var(--red);border:1px solid var(--red);}
+
+/* LIGHTBOX */
+.lb{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:800;display:none;align-items:center;justify-content:center;padding:20px;}
+.lb.open{display:flex;}
+.lb img{max-width:92vw;max-height:86vh;border-radius:10px;object-fit:contain;}
+.lb-close{position:fixed;top:16px;right:20px;background:#fff;color:var(--navy);border:none;border-radius:50%;width:34px;height:34px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;z-index:801;}
+.lb-cap{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);color:#fff;font-size:12px;opacity:.8;text-align:center;}
+
+@media(max-width:640px){
+  .main{padding:12px 12px 40px;}
+  .hero{padding:14px 12px 0;}
+  .topbar{padding:0 12px;}
+  .cats-grid{grid-template-columns:1fr;}
+  .photos-grid{grid-template-columns:repeat(2,1fr);}
+  .hstats{gap:12px;}
+  .hs .v{font-size:22px;}
+  .btxt{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- SETUP SCREEN -->
+<div class="setup-screen" id="setup">
+  <div class="setup-box">
+    <div class="setup-logo">AB</div>
+    <h2>Connect to Firebase</h2>
+    <p>This is a one-time setup. Once connected, you and your site supervisor will share live data from any device.</p>
+    <div class="setup-steps">
+      <strong>3-step setup (10 minutes, free):</strong><br>
+      1. Go to <a href="https://firebase.google.com" target="_blank">firebase.google.com</a> → "Go to Console"<br>
+      2. Create a project → "Realtime Database" → "Create database" → Start in test mode<br>
+      3. Copy the database URL (looks like <em>https://your-app.firebaseio.com</em>)<br>
+      4. Paste it below and click Connect
+    </div>
+    <label class="setup-label">Firebase Database URL</label>
+    <input class="setup-input" id="fb-url" placeholder="https://your-project-default-rtdb.firebaseio.com" type="url"/>
+    <label class="setup-label">Your Name</label>
+    <input class="setup-input" id="fb-name" placeholder="e.g. Hira (SIAS) or Ahmed (Site Supervisor)"/>
+    <button class="btn-connect" onclick="connectFirebase()">Connect & Open Tracker →</button>
+    <div class="setup-error" id="setup-error"></div>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading">
+  <div class="load-logo">AB</div>
+  <div class="load-text">Allied Bank · Fazaia Branch</div>
+  <div class="load-sub" id="load-sub">Connecting to database…</div>
+</div>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="brand">
+    <div class="bmark">AB</div>
+    <div class="btxt">
+      <strong>Allied Bank · Fazaia Branch</strong>
+      <span>Live Site Progress Tracker</span>
+    </div>
+  </div>
+  <div class="tbar-right">
+    <div class="sync-pill sp-live" id="sync-pill">
+      <div class="sdot"></div><span id="sync-lbl">Live</span>
+    </div>
+    <button class="btn-settings" onclick="resetSetup()">⚙ Settings</button>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-top">
+    <div class="htitle">
+      <h1>Interior Fit-Out<br>Progress Dashboard</h1>
+      <p>SIAS Interior Architecture Studio · DHA Lahore · Allied Bank Pvt Ltd</p>
+    </div>
+    <div class="hstats">
+      <div class="hs"><div class="v" id="g-pct">0%</div><div class="l">Overall</div></div>
+      <div class="hs"><div class="v" id="g-done">0</div><div class="l">Done</div></div>
+      <div class="hs"><div class="v" id="g-ip">0</div><div class="l">Active</div></div>
+      <div class="hs"><div class="v" id="g-iss">0</div><div class="l">Issues</div></div>
+    </div>
+  </div>
+  <div class="meta-strip">
+    <div class="mf" style="opacity:.7"><label>Project</label><input value="Allied Bank Fazaia — Interior Fit-Out" readonly/></div>
+    <div class="mf" style="opacity:.7"><label>Designer</label><input value="SIAS Interior Architecture Studio" readonly/></div>
+    <div class="mf"><label>Visit Date</label><input type="date" id="f-date" onchange="saveMeta()"/></div>
+    <div class="mf"><label>Site Supervisor</label><input type="text" id="f-sup" placeholder="Name" onchange="saveMeta()"/></div>
+    <div class="mf"><label>Contractor Rep.</label><input type="text" id="f-con" placeholder="Name" onchange="saveMeta()"/></div>
+    <div class="mf"><label>Next Visit Due</label><input type="date" id="f-next" onchange="saveMeta()"/></div>
+  </div>
+  <div class="tabs-wrap" id="tabs"></div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="sum-strip">
+    <div class="sc gold-c"><div class="sv" id="s-pct">0%</div><div class="sl">Complete</div></div>
+    <div class="sc"><div class="sv" id="s-done">0</div><div class="sl">Done</div></div>
+    <div class="sc"><div class="sv" id="s-ip">0</div><div class="sl">In Progress</div></div>
+    <div class="sc"><div class="sv" id="s-ob">0</div><div class="sl">On Hold</div></div>
+    <div class="sc"><div class="sv" id="s-qc">0</div><div class="sl">QC Review</div></div>
+    <div class="sc"><div class="sv" id="s-iss">0</div><div class="sl">Issues</div></div>
+    <div class="sc"><div class="sv" id="s-photos">0</div><div class="sl">Photos</div></div>
+    <div class="sc"><div class="sv" id="s-saved">—</div><div class="sl">Last Sync</div></div>
+  </div>
+  <div id="panels"></div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lb" id="lb" onclick="closeLB()">
+  <button class="lb-close" onclick="closeLB()">✕</button>
+  <img id="lb-img" src="" alt=""/>
+  <div class="lb-cap" id="lb-cap"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+// ── Firebase SDK ──────────────────────────────────────────────────────────
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, onValue, get }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getStorage, ref as sRef, uploadString, getDownloadURL, deleteObject }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+// ── PROJECT DATA ──────────────────────────────────────────────────────────
+const FLOORS = [
+  {id:"basement",name:"Basement",theme:"Internal / Security",rooms:[
+    {n:"Lobby (North)",d:"6'-7\" Wide"},{n:"Lobby (South)",d:"6'-7\" Wide"},
+    {n:"Lobby (Central)",d:"4'-3\" Wide"},{n:"IT Room",d:"6'-7\"×9'-9\""},
+    {n:"CCTV Room",d:"11'-0\"×4'-4\""},{n:"Cash Vault Room",d:"7'-4\"×7'-0\""},
+    {n:"Maintenance Room",d:"7'-0\"×9'-7½\""},{n:"Staff Room / Prayer Area",d:"8'-0\"×11'-0\""},
+    {n:"Record Room",d:"12'-9\"×7'-4\""},{n:"Bath",d:"8'-0\"×5'-0\""},
+    {n:"Lockers Area",d:"—"},{n:"Lift Lobby",d:"7'-7½\"×6'-0\""},
+  ]},
+  {id:"ground",name:"Ground Floor",theme:"Client Reception & Concierge",rooms:[
+    {n:"Entrance / Lobby",d:"—"},{n:"Concierge Desk",d:"—"},
+    {n:"Waiting Area",d:"13'-0\"×14'-0\""},{n:"Lift Lobby",d:"7'-7½\"×6'-0\""},
+    {n:"Metal Sliding Door Zone",d:"—"},{n:"CNC Glass Sheet Wall (Backlit)",d:"—"},
+    {n:"Floor Lighting Zone",d:"—"},
+  ]},
+  {id:"first",name:"First Floor",theme:"Meeting & Transition",rooms:[
+    {n:"Meeting Room",d:"20'-1\"×10'-5\""},{n:"Bath",d:"7'-0\"×5'-0\""},
+    {n:"Lift Lobby",d:"7'-7½\"×6'-0\""},{n:"Glass Partition Zone",d:"—"},
+    {n:"Glass Door (North)",d:"—"},{n:"Glass Door (South)",d:"—"},
+    {n:"Travertine Tile Lobby (Backlit Logo)",d:"—"},
+  ]},
+  {id:"second",name:"Second Floor",theme:"Wealth Advisory",rooms:[
+    {n:"Lounge / Waiting Area",d:"19'-11\"×17'-6\""},
+    {n:"Relations Manager Office 1",d:"7'-0\"×9'-0\""},{n:"Relations Manager Office 2",d:"7'-0\"×9'-0\""},
+    {n:"Investment Consultation Room",d:"9'-10\"×11'-7\""},{n:"Wealth Advisory Room",d:"9'-10\"×11'-9\""},
+    {n:"Bar Stools Sitting Area",d:"—"},{n:"Storage 1",d:"—"},{n:"Storage 2",d:"—"},
+    {n:"Lift Lobby",d:"7'-7½\"×6'-0\""},
+  ]},
+  {id:"third",name:"Third Floor",theme:"Next Gen Lounge",rooms:[
+    {n:"Next Gen Lounge",d:"20'-1½\"×16'-6\""},{n:"Consultation Room",d:"14'-0\"×9'-1½\""},
+    {n:"Finance Library (North)",d:"—"},{n:"Finance Library (South)",d:"—"},
+    {n:"Digital Wall / LCD Zone",d:"—"},{n:"Sliding Door Zone",d:"6'-6\" Wide Passage"},
+    {n:"Sitting Area",d:"—"},{n:"Bath",d:"8'-0\"×5'-0\""},{n:"Lift Lobby",d:"7'-7½\"×6'-0\""},
+  ]},
+  {id:"fourth",name:"Fourth Floor",theme:"Co-Working & Cafeteria",rooms:[
+    {n:"Co-Working Space",d:"20'-0\"×15'-0\""},{n:"Cafeteria / Coffee Shop",d:"8'×10'"},
+    {n:"Coffee Prep Area",d:"—"},{n:"Soundproof Meeting Room 1",d:"8'-4\"×5'-0\""},
+    {n:"Soundproof Meeting Room 2",d:"8'-4\"×5'-0\""},{n:"Sitting Semi-Private Pods",d:"—"},
+    {n:"Working Bar",d:"—"},{n:"Sitting Space (North)",d:"—"},{n:"Sitting Space (South)",d:"—"},
+    {n:"Planter Zone (North)",d:"—"},{n:"Planter Zone (South)",d:"—"},
+    {n:"Bath",d:"8'-0\"×5'-0\""},{n:"Lift Lobby",d:"—"},
+  ]},
+  {id:"fifth",name:"Fifth Floor",theme:"Internal Operations",rooms:[
+    {n:"Branch Manager Office",d:"10'-0\"×11'-0\""},{n:"Staff Meeting Room",d:"14'-6\"×11'-0\""},
+    {n:"Consultation Room",d:"14'-6\"×11'-0\""},{n:"Bar Stools Sitting Area",d:"7'-7½\"×6'-0\""},
+    {n:"Bath",d:"8'-0\"×5'-0\""},{n:"Lift Lobby",d:"7'-7½\"×6'-0\""},
+    {n:"Cabinet / Shelf Zone",d:"—"},{n:"Wilsonart Laminate Panel (North)",d:"—"},
+    {n:"Wilsonart Laminate Panel (South)",d:"—"},{n:"Rope Light Zones (×2)",d:"—"},
+  ]},
+];
+const CATS=[
+  {c:"CVL",n:"Civil / Demolition"},{c:"MEP-E",n:"MEP – Electrical"},
+  {c:"MEP-P",n:"MEP – Plumbing"},{c:"MEP-H",n:"MEP – HVAC"},
+  {c:"GYP",n:"Gypsum / Drywall"},{c:"FLR",n:"Flooring"},
+  {c:"WFP",n:"Wall Finishes / Paint"},{c:"JOI",n:"Joinery / Carpentry"},
+  {c:"GLS",n:"Glass & Partitions"},{c:"FCL",n:"False Ceiling"},
+  {c:"LTG",n:"Lighting & Fixtures"},{c:"FRN",n:"Furniture Install"},
+  {c:"SGN",n:"Signage / Branding"},{c:"CLN",n:"Cleaning & Handover"},
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+let db, storage, fbApp;
+let state={}, meta={}, visits={}, photos={};
+// photos[floorId][roomIdx] = [{id,url,caption,uploadedBy,timestamp}]
+let saveTimer=null;
+let userName='';
+
+function defaultState(){
+  const s={};
+  FLOORS.forEach(f=>{
+    s[f.id]={};
+    f.rooms.forEach((_,ri)=>{
+      s[f.id][ri]={};
+      CATS.forEach((_,ci)=>{s[f.id][ri][ci]={status:'NS',pct:0,issue:''};});
+    });
+  });
+  return s;
+}
+
+// ── FIREBASE CONNECT ──────────────────────────────────────────────────────
+window.connectFirebase = async function() {
+  const url = document.getElementById('fb-url').value.trim();
+  const name = document.getElementById('fb-name').value.trim();
+  const errEl = document.getElementById('setup-error');
+  errEl.style.display='none';
+  if(!url || !url.startsWith('https://')) {
+    errEl.textContent='Please enter a valid Firebase database URL.'; errEl.style.display='block'; return;
+  }
+  if(!name){ errEl.textContent='Please enter your name.'; errEl.style.display='block'; return; }
+  localStorage.setItem('ab_fb_url', url);
+  localStorage.setItem('ab_fb_name', name);
+  await boot(url, name);
+};
+
+async function boot(dbUrl, name) {
+  document.getElementById('setup').classList.add('hidden');
+  document.getElementById('loading').style.display='flex';
+  userName = name;
+  setSyncing('Connecting…');
+  try {
+    const projectId = dbUrl.replace('https://','').replace('.firebaseio.com','').replace('-default-rtdb','').split('.')[0];
+    fbApp = initializeApp({
+      databaseURL: dbUrl,
+      projectId: projectId,
+      storageBucket: projectId+'.appspot.com',
+    }, 'ab-tracker');
+    db = getDatabase(fbApp);
+
+    // Try storage (optional — may not be enabled)
+    try { storage = getStorage(fbApp); } catch(e){ storage=null; }
+
+    // Load initial data
+    document.getElementById('load-sub').textContent = 'Loading progress data…';
+    const snap = await get(ref(db, 'tracker'));
+    if(snap.exists()){
+      const d = snap.val();
+      state   = d.state   || defaultState();
+      meta    = d.meta    || {};
+      visits  = d.visits  || {};
+      photos  = d.photos  || {};
+    } else {
+      state = defaultState(); meta={}; visits={}; photos={};
+    }
+    fillGaps();
+    buildUI();
+    applyMeta();
+    FLOORS.forEach(f=>{ renderVisits(f.id); renderPhotos(f.id); });
+    recalc();
+    // Live listener
+    onValue(ref(db,'tracker'), snap=>{
+      if(!snap.exists()) return;
+      const d=snap.val();
+      state  =d.state  ||state;
+      meta   =d.meta   ||meta;
+      visits =d.visits ||visits;
+      photos =d.photos ||photos;
+      applyMeta();
+      refreshAllUI();
+      FLOORS.forEach(f=>{ renderVisits(f.id); renderPhotos(f.id); });
+      recalc();
+      setSynced();
+    });
+    setTimeout(()=>{
+      document.getElementById('loading').classList.add('hidden');
+      setTimeout(()=>document.getElementById('loading').style.display='none',400);
+    },600);
+    setSynced();
+  } catch(e) {
+    console.error(e);
+    document.getElementById('loading').style.display='none';
+    document.getElementById('setup').classList.remove('hidden');
+    const err=document.getElementById('setup-error');
+    err.textContent='Connection failed: '+e.message; err.style.display='block';
+  }
+}
+
+function fillGaps(){
+  FLOORS.forEach(f=>{
+    if(!state[f.id]) state[f.id]={};
+    if(!visits[f.id]) visits[f.id]=[];
+    if(!photos[f.id]) photos[f.id]={};
+    f.rooms.forEach((_,ri)=>{
+      if(!state[f.id][ri]) state[f.id][ri]={};
+      if(!photos[f.id][ri]) photos[f.id][ri]=[];
+      CATS.forEach((_,ci)=>{
+        if(!state[f.id][ri][ci]) state[f.id][ri][ci]={status:'NS',pct:0,issue:''};
+      });
+    });
+  });
+}
+
+async function pushToFirebase(){
+  if(!db) return;
+  setSyncing('Saving…');
+  try {
+    await set(ref(db,'tracker'),{state,meta,visits,photos});
+    const t=new Date(); const ts=t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0');
+    setSynced('Synced '+ts);
+    document.getElementById('s-saved').textContent=ts;
+  } catch(e){ setSyncErr(); showToast('Sync failed — check connection','err'); }
+}
+
+function scheduleSave(){
+  setSyncing('Saving…');
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(pushToFirebase,1500);
+}
+
+// ── SYNC UI ──────────────────────────────────────────────────────────────
+function setSyncing(t='Saving…'){const p=document.getElementById('sync-pill');p.className='sync-pill sp-saving';document.getElementById('sync-lbl').textContent=t;}
+function setSynced(t='Live — synced'){const p=document.getElementById('sync-pill');p.className='sync-pill sp-live';document.getElementById('sync-lbl').textContent=t;}
+function setSyncErr(){const p=document.getElementById('sync-pill');p.className='sync-pill sp-err';document.getElementById('sync-lbl').textContent='Sync error';}
+
+// ── META ─────────────────────────────────────────────────────────────────
+window.saveMeta=function(){
+  meta.date=document.getElementById('f-date').value;
+  meta.sup =document.getElementById('f-sup').value;
+  meta.con =document.getElementById('f-con').value;
+  meta.next=document.getElementById('f-next').value;
+  scheduleSave();
+};
+function applyMeta(){
+  if(meta.date) document.getElementById('f-date').value=meta.date;
+  if(meta.sup)  document.getElementById('f-sup').value=meta.sup;
+  if(meta.con)  document.getElementById('f-con').value=meta.con;
+  if(meta.next) document.getElementById('f-next').value=meta.next;
+}
+
+// ── BUILD UI ──────────────────────────────────────────────────────────────
+function buildUI(){
+  const tabsEl=document.getElementById('tabs');
+  const panelsEl=document.getElementById('panels');
+  tabsEl.innerHTML=''; panelsEl.innerHTML='';
+  FLOORS.forEach((fl,fi)=>{
+    const tab=document.createElement('button');
+    tab.className='ftab'+(fi===0?' active':'');
+    tab.innerHTML=`<span class="tp" id="tp-${fl.id}">0%</span><span class="tn">${fl.name}</span><span class="tbar-ind"></span>`;
+    tab.onclick=()=>switchTab(fi);
+    tabsEl.appendChild(tab);
+    const panel=document.createElement('div');
+    panel.className='floor-panel'+(fi===0?' active':'');
+    panel.id=`panel-${fl.id}`;
+    panel.innerHTML=buildFloor(fl);
+    panelsEl.appendChild(panel);
+  });
+}
+
+function buildFloor(fl){
+  const rooms=fl.rooms.map((r,ri)=>buildRoom(fl,r,ri)).join('');
+  return `
+  <div class="floor-card">
+    <div class="fcl"><h2>${fl.name}</h2><p>${fl.theme}</p></div>
+    <div class="fpw">
+      <div class="fp-lbl"><span>Floor progress</span><strong id="fplbl-${fl.id}">0%</strong></div>
+      <div class="fbar"><div class="fbar-fill" id="fbar-${fl.id}" style="width:0%"></div></div>
+    </div>
+    <div class="fbig" id="fpct-${fl.id}">0<span>%</span></div>
+  </div>
+  <div class="rooms-list">${rooms}</div>
+  <div class="vsection">
+    <div class="vsec-hdr">
+      <h3>Site Visit Log — ${fl.name}</h3>
+      <button class="btn-addv" onclick="addVisit('${fl.id}')">+ Log Visit</button>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="vtable">
+        <thead><tr>
+          <th style="width:50px">#</th><th style="width:100px">Date</th>
+          <th style="width:125px">Supervisor</th><th style="width:125px">Contractor</th>
+          <th>Observations / Instructions</th>
+          <th style="width:100px">Next Visit</th><th style="width:75px">Sign-Off</th>
+        </tr></thead>
+        <tbody id="vbody-${fl.id}"></tbody>
+      </table>
+      <div id="vempty-${fl.id}" class="v-empty">No visits logged yet. Tap "+ Log Visit" after each site visit.</div>
+    </div>
+  </div>`;
+}
+
+function buildRoom(fl,room,ri){
+  const cats=CATS.map((cat,ci)=>{
+    const d=state[fl.id]?.[ri]?.[ci]||{status:'NS',pct:0,issue:''};
+    const opts=['NS','IP','CM','OB','QC'].map(s=>
+      `<option value="${s}"${d.status===s?' selected':''}>${{NS:'Not Started',IP:'In Progress',CM:'Completed',OB:'On Hold',QC:'QC Review'}[s]}</option>`
+    ).join('');
+    return `
+    <div class="citem">
+      <div class="citem-top">
+        <div><div class="cc">${cat.c}</div><div class="cn">${cat.n}</div></div>
+        <select class="ssel s${d.status}" id="sel-${fl.id}-${ri}-${ci}" onchange="onStatus('${fl.id}',${ri},${ci},this)">${opts}</select>
+      </div>
+      <div class="pct-row">
+        <input type="range" min="0" max="100" step="5" value="${d.pct}" id="rng-${fl.id}-${ri}-${ci}" oninput="onPct('${fl.id}',${ri},${ci},this)"/>
+        <span class="pctv" id="pv-${fl.id}-${ri}-${ci}">${d.pct}%</span>
+      </div>
+      <textarea class="iinput" rows="1" placeholder="Issue / snag" id="iss-${fl.id}-${ri}-${ci}" onchange="onIssue('${fl.id}',${ri},${ci},this)">${d.issue||''}</textarea>
+    </div>`;
+  }).join('');
+  return `
+  <div class="rcard" id="rc-${fl.id}-${ri}">
+    <div class="rcard-hdr" onclick="toggleRoom('${fl.id}',${ri})">
+      <div class="rhl">
+        <div class="rnum">${String(ri+1).padStart(2,'0')}</div>
+        <div class="ri"><h3>${room.n}</h3><p>${room.d}</p></div>
+      </div>
+      <div class="rhr">
+        <div class="rpill" id="rp-${fl.id}-${ri}">0%</div>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+    </div>
+    <div class="rbody">
+      <div class="cats-grid">${cats}</div>
+      <div class="photo-section">
+        <div class="photo-section-hdr">
+          <h4>📸 Site Photos — ${room.n}</h4>
+          <label class="btn-add-photo">
+            + Add Photo
+            <input type="file" accept="image/*" multiple class="photo-input-hidden"
+              onchange="onPhotoUpload('${fl.id}',${ri},this)"/>
+          </label>
+        </div>
+        <div class="photos-grid" id="pgrid-${fl.id}-${ri}">
+          <div class="photo-empty">No photos yet. Tap "+ Add Photo" to upload site images.</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── PHOTOS ────────────────────────────────────────────────────────────────
+window.onPhotoUpload = function(fid, ri, input) {
+  const files = Array.from(input.files);
+  if(!files.length) return;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = async e => {
+      const base64 = e.target.result; // full data URL
+      const id = Date.now()+'-'+Math.random().toString(36).slice(2,7);
+      let url = base64; // fallback: store as base64
+      // Try Firebase Storage if available
+      if(storage){
+        try {
+          const storageRef = sRef(storage, `photos/${fid}/${ri}/${id}`);
+          await uploadString(storageRef, base64, 'data_url');
+          url = await getDownloadURL(storageRef);
+        } catch(err){ /* fallback to base64 */ }
+      }
+      if(!photos[fid]) photos[fid]={};
+      if(!photos[fid][ri]) photos[fid][ri]=[];
+      photos[fid][ri].push({id, url, caption:'', uploadedBy:userName, timestamp:new Date().toISOString()});
+      renderPhotos(fid, ri);
+      scheduleSave();
+      showToast('Photo added ✓','ok');
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value='';
+};
+
+function renderPhotos(fid, targetRi) {
+  const floorPhotos = photos[fid]||{};
+  const floor = FLOORS.find(f=>f.id===fid);
+  if(!floor) return;
+  const riList = targetRi !== undefined ? [targetRi] : floor.rooms.map((_,i)=>i);
+  riList.forEach(ri => {
+    const grid = document.getElementById(`pgrid-${fid}-${ri}`);
+    if(!grid) return;
+    const list = floorPhotos[ri]||[];
+    if(!list.length){
+      grid.innerHTML='<div class="photo-empty">No photos yet. Tap "+ Add Photo" to upload site images.</div>';
+      return;
+    }
+    grid.innerHTML = list.map((p,pi)=>`
+      <div class="photo-thumb">
+        <img src="${p.url}" alt="${p.caption||'Site photo'}" onclick="openLB('${p.url}','${p.caption||''}')"/>
+        <div class="photo-thumb-overlay">
+          <div class="photo-actions">
+            <button class="btn-del-photo" onclick="delPhoto('${fid}',${ri},${pi},event)">✕ Delete</button>
+          </div>
+        </div>
+        <input class="photo-caption-inp" value="${p.caption||''}" placeholder="Add caption…"
+          onchange="updateCaption('${fid}',${ri},${pi},this.value)" onclick="event.stopPropagation()"/>
+      </div>`).join('');
+    // update global photo count
+    let total=0;
+    FLOORS.forEach(f=>{ const fp=photos[f.id]||{}; Object.values(fp).forEach(arr=>{ total+=(arr||[]).length; }); });
+    document.getElementById('s-photos').textContent=total;
+  });
+}
+
+window.delPhoto = function(fid,ri,pi,e){
+  e.stopPropagation();
+  if(!confirm('Delete this photo?')) return;
+  const p = photos[fid]?.[ri]?.[pi];
+  if(!p) return;
+  // Try delete from storage
+  if(storage && p.url && p.url.startsWith('https://')){
+    try { deleteObject(sRef(storage,`photos/${fid}/${ri}/${p.id}`)); } catch(err){}
+  }
+  photos[fid][ri].splice(pi,1);
+  renderPhotos(fid,ri);
+  scheduleSave();
+  showToast('Photo deleted','ok');
+};
+
+window.updateCaption = function(fid,ri,pi,val){
+  if(photos[fid]?.[ri]?.[pi]) photos[fid][ri][pi].caption=val;
+  scheduleSave();
+};
+
+window.openLB = function(url,cap){
+  document.getElementById('lb-img').src=url;
+  document.getElementById('lb-cap').textContent=cap;
+  document.getElementById('lb').classList.add('open');
+};
+window.closeLB = function(){ document.getElementById('lb').classList.remove('open'); };
+
+// ── INTERACTIONS ─────────────────────────────────────────────────────────
+window.switchTab = function(fi){
+  document.querySelectorAll('.ftab').forEach((t,i)=>t.classList.toggle('active',i===fi));
+  document.querySelectorAll('.floor-panel').forEach((p,i)=>p.classList.toggle('active',i===fi));
+};
+window.toggleRoom = function(fid,ri){
+  document.getElementById(`rc-${fid}-${ri}`).classList.toggle('open');
+};
+window.onStatus = function(fid,ri,ci,sel){
+  const v=sel.value; sel.className=`ssel s${v}`;
+  state[fid][ri][ci].status=v;
+  const ap={NS:0,IP:50,CM:100,OB:null,QC:90}[v];
+  if(ap!==null&&ap!==undefined){
+    state[fid][ri][ci].pct=ap;
+    const rng=document.getElementById(`rng-${fid}-${ri}-${ci}`);
+    const pv=document.getElementById(`pv-${fid}-${ri}-${ci}`);
+    if(rng){rng.value=ap; pv.textContent=ap+'%';}
+  }
+  recalc(); scheduleSave();
+};
+window.onPct = function(fid,ri,ci,rng){
+  const v=parseInt(rng.value);
+  document.getElementById(`pv-${fid}-${ri}-${ci}`).textContent=v+'%';
+  state[fid][ri][ci].pct=v;
+  const ns=v===0?'NS':v===100?'CM':'IP';
+  state[fid][ri][ci].status=ns;
+  const sel=document.getElementById(`sel-${fid}-${ri}-${ci}`);
+  sel.value=ns; sel.className=`ssel s${ns}`;
+  recalc(); scheduleSave();
+};
+window.onIssue = function(fid,ri,ci,ta){
+  state[fid][ri][ci].issue=ta.value; recalc(); scheduleSave();
+};
+window.addVisit = function(fid){
+  if(!visits[fid]) visits[fid]=[];
+  visits[fid].push({date:meta.date||'',sup:meta.sup||userName,con:meta.con||'',obs:'',next:meta.next||'',sig:''});
+  renderVisits(fid); scheduleSave();
+};
+window.updVisit = function(fid,i,key,val){
+  if(visits[fid]?.[i]) visits[fid][i][key]=val; scheduleSave();
+};
+
+function renderVisits(fid){
+  const rows=visits[fid]||[];
+  const tbody=document.getElementById(`vbody-${fid}`);
+  const empty=document.getElementById(`vempty-${fid}`);
+  if(!tbody) return;
+  tbody.innerHTML=rows.map((v,i)=>`
+    <tr>
+      <td><span class="vnum">#${String(i+1).padStart(2,'0')}</span></td>
+      <td><input type="date" value="${v.date||''}" onchange="updVisit('${fid}',${i},'date',this.value)"/></td>
+      <td><input type="text" value="${v.sup||''}" placeholder="Name" onchange="updVisit('${fid}',${i},'sup',this.value)"/></td>
+      <td><input type="text" value="${v.con||''}" placeholder="Name" onchange="updVisit('${fid}',${i},'con',this.value)"/></td>
+      <td><textarea rows="2" onchange="updVisit('${fid}',${i},'obs',this.value)">${v.obs||''}</textarea></td>
+      <td><input type="date" value="${v.next||''}" onchange="updVisit('${fid}',${i},'next',this.value)"/></td>
+      <td><input type="text" value="${v.sig||''}" placeholder="Initials" onchange="updVisit('${fid}',${i},'sig',this.value)"/></td>
+    </tr>`).join('');
+  empty.style.display=rows.length?'none':'block';
+}
+
+// ── RECALC ────────────────────────────────────────────────────────────────
+function recalc(){
+  let gSum=0,gCnt=0,gDone=0,gIP=0,gOB=0,gQC=0,gIss=0;
+  FLOORS.forEach(fl=>{
+    let fSum=0,fCnt=0;
+    fl.rooms.forEach((_,ri)=>{
+      let rSum=0;
+      CATS.forEach((_,ci)=>{
+        const d=state[fl.id]?.[ri]?.[ci]||{status:'NS',pct:0,issue:''};
+        rSum+=d.pct; fSum+=d.pct; gSum+=d.pct; fCnt++; gCnt++;
+        if(d.status==='CM') gDone++;
+        if(d.status==='IP') gIP++;
+        if(d.status==='OB') gOB++;
+        if(d.status==='QC') gQC++;
+        if(d.issue&&d.issue.trim()) gIss++;
+      });
+      const rp=Math.round(rSum/CATS.length);
+      const rpEl=document.getElementById(`rp-${fl.id}-${ri}`);
+      if(rpEl) rpEl.textContent=rp+'%';
+    });
+    const fp=fCnt>0?Math.round(fSum/fCnt):0;
+    const fpEl=document.getElementById(`fpct-${fl.id}`);
+    const fbarEl=document.getElementById(`fbar-${fl.id}`);
+    const flblEl=document.getElementById(`fplbl-${fl.id}`);
+    const tpEl=document.getElementById(`tp-${fl.id}`);
+    if(fpEl)  fpEl.innerHTML=fp+'<span>%</span>';
+    if(fbarEl) fbarEl.style.width=fp+'%';
+    if(flblEl) flblEl.textContent=fp+'%';
+    if(tpEl)  tpEl.textContent=fp+'%';
+  });
+  const gp=gCnt>0?Math.round(gSum/gCnt):0;
+  document.getElementById('g-pct').textContent=gp+'%';
+  document.getElementById('s-pct').textContent=gp+'%';
+  document.getElementById('g-done').textContent=gDone;
+  document.getElementById('s-done').textContent=gDone;
+  document.getElementById('g-ip').textContent=gIP;
+  document.getElementById('s-ip').textContent=gIP;
+  document.getElementById('g-iss').textContent=gIss;
+  document.getElementById('s-iss').textContent=gIss;
+  document.getElementById('s-ob').textContent=gOB;
+  document.getElementById('s-qc').textContent=gQC;
+}
+
+function refreshAllUI(){
+  FLOORS.forEach(fl=>{
+    fl.rooms.forEach((_,ri)=>{
+      CATS.forEach((_,ci)=>{
+        const d=state[fl.id]?.[ri]?.[ci]||{status:'NS',pct:0,issue:''};
+        const sel=document.getElementById(`sel-${fl.id}-${ri}-${ci}`);
+        const rng=document.getElementById(`rng-${fl.id}-${ri}-${ci}`);
+        const pv=document.getElementById(`pv-${fl.id}-${ri}-${ci}`);
+        const iss=document.getElementById(`iss-${fl.id}-${ri}-${ci}`);
+        if(sel){sel.value=d.status;sel.className=`ssel s${d.status}`;}
+        if(rng) rng.value=d.pct;
+        if(pv)  pv.textContent=d.pct+'%';
+        if(iss) iss.value=d.issue||'';
+      });
+    });
+  });
+}
+
+// ── TOAST ────────────────────────────────────────────────────────────────
+let toastT;
+window.showToast=function(msg,type='ok'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=`toast ${type} show`;
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),3000);
+};
+
+// ── RESET ────────────────────────────────────────────────────────────────
+window.resetSetup=function(){
+  if(!confirm('Change Firebase settings?')) return;
+  localStorage.removeItem('ab_fb_url'); localStorage.removeItem('ab_fb_name');
+  location.reload();
+};
+
+// ── AUTO-BOOT ─────────────────────────────────────────────────────────────
+(function(){
+  document.getElementById('f-date').value=new Date().toISOString().slice(0,10);
+  const savedUrl=localStorage.getItem('ab_fb_url');
+  const savedName=localStorage.getItem('ab_fb_name');
+  if(savedUrl && savedName){
+    document.getElementById('setup').classList.add('hidden');
+    boot(savedUrl, savedName);
+  } else {
+    document.getElementById('loading').style.display='none';
+  }
+})();
+</script>
+</body>
+</html>
