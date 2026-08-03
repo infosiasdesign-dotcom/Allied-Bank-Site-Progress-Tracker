@@ -406,7 +406,7 @@ import { getDatabase, ref, set, onValue, get }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 import { getStorage, ref as sRef, uploadString, getDownloadURL, deleteObject }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
-import { getAuth, signInAnonymously }
+import { getAuth, signInAnonymously, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 // ── PROJECT DATA ──────────────────────────────────────────────────────────
@@ -523,7 +523,13 @@ async function boot(dbUrl, name) {
     // Sign in anonymously so the database rules (auth != null) allow access
     document.getElementById('load-sub').textContent = 'Signing in…';
     const auth = getAuth(fbApp);
-    await signInAnonymously(auth);
+    await new Promise((resolve, reject) => {
+      const unsub = onAuthStateChanged(auth, (user) => {
+        if (user) { unsub(); resolve(); }
+      }, (err) => { unsub(); reject(err); });
+      signInAnonymously(auth).catch((err) => { unsub(); reject(err); });
+    });
+    console.log('Signed in as', auth.currentUser?.uid);
 
     db = getDatabase(fbApp);
 
